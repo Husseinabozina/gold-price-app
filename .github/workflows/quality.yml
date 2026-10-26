@@ -15,9 +15,16 @@ jobs:
           channel: stable
           flutter-version: '3.41.9'
           cache: true
+      - run: flutter create . --project-name ayar --platforms=android,ios
       - run: flutter pub get
       - run: flutter analyze
       - run: flutter test
+      - run: flutter build apk --debug --dart-define=AYAR_PREVIEW=true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ayar-preview-debug-apk
+          path: build/app/outputs/flutter-apk/app-debug.apk
+          if-no-files-found: error
   backend-quality:
     runs-on: ubuntu-latest
     defaults:

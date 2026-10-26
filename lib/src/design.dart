@@ -1,7 +1,7 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart';
+import 'package:intl/intl.dart' as intl;
 import 'market.dart';
 
 class AyarColors {
@@ -43,7 +43,7 @@ ThemeData ayarTheme() {
 
 String money(num? value, {int decimals=0}) {
   if (value == null || !value.isFinite) return '—';
-  return NumberFormat.decimalPatternDigits(locale:'en', decimalDigits:decimals)
+  return intl.NumberFormat.decimalPatternDigits(locale:'en', decimalDigits:decimals)
       .format(value);
 }
 
@@ -54,7 +54,7 @@ String ago(DateTime? time) {
   if (minutes < 1) return 'منذ لحظات';
   if (minutes < 60) return 'منذ $minutes دقيقة';
   if (minutes < 1440) return 'منذ ${minutes ~/ 60} ساعة';
-  return DateFormat('yyyy/MM/dd HH:mm','en').format(time.toLocal());
+  return intl.DateFormat('yyyy/MM/dd HH:mm','en').format(time.toLocal());
 }
 
 class GoldMark extends StatelessWidget {
