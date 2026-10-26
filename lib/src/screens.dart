@@ -145,7 +145,7 @@ class _AyarShellState extends State<AyarShell> {
       if(!mounted) return;
       await Navigator.of(context).push(MaterialPageRoute(
         builder:(_)=>AdminScreen(data:widget.data)));
-    } catch(e) {if(context.mounted) {showError(context,e);}}
+    } catch(e) {if(mounted) {showError(context,e);}}
   }
   @override Widget build(BuildContext context) => StreamBuilder<MarketQuote>(
     stream:quoteStream,
