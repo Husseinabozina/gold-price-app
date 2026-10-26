@@ -20,6 +20,12 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
     await tester.ensureVisible(find.text('الدخول كزائر'));
+    final originalErrorHandler = FlutterError.onError;
+    FlutterError.onError = (details) {
+      debugPrint('AYAR_LAYOUT_DEBUG: ${details.toString()}');
+      originalErrorHandler?.call(details);
+    };
+    addTearDown(() => FlutterError.onError = originalErrorHandler);
     await tester.tap(find.text('الدخول كزائر'));
     await tester.pumpAndSettle();
     expect(find.text('الأسعار اليوم'), findsOneWidget);
