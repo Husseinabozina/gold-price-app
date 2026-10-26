@@ -1,0 +1,46 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function admin() { return signedIn() && request.auth.token.admin == true; }
+    match /market/state {
+      allow read: if signedIn();
+      allow write: if false; // Admin SDK callable functions only.
+    }
+    match /bulletins/{bulletinId} {
+      allow read: if signedIn();
+      allow write: if false;
+    }
+    match /users/{uid} {
+      allow read: if signedIn() && request.auth.uid == uid;
+      allow create, update: if signedIn() && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['fcmTokens', 'updatedAt'])
+        && request.resource.data.fcmTokens is list
+        && request.resource.data.fcmTokens.size() <= 10;
+      allow delete: if false;
+    }
+    match /alerts/{alertId} {
+      allow read: if signedIn() && resource.data.ownerUid == request.auth.uid;
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly([
+          'ownerUid','karat','targetSdg','direction','enabled','createdAt'])
+        && request.resource.data.ownerUid == request.auth.uid
+        && request.resource.data.karat in [18,21,24]
+        && request.resource.data.targetSdg is number
+        && request.resource.data.targetSdg > 0
+        && request.resource.data.targetSdg <= 1000000000000
+        && request.resource.data.direction in ['above','below']
+        && request.resource.data.enabled == true;
+      allow delete: if signedIn() && resource.data.ownerUid == request.auth.uid;
+      allow update: if false; // Triggered/disabled by Cloud Functions only.
+    }
+    match /notification_outbox/{jobId} {
+      allow read, write: if false; // Server Admin SDK only.
+    }
+    match /audit_fx/{changeId} {
+      allow read: if admin();
+      allow write: if false;
+    }
+    match /{document=**} {allow read, write: if false;}
+  }
+}

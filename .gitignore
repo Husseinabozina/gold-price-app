@@ -1,0 +1,16 @@
+.dart_tool/
+.flutter-plugins*
+.packages
+build/
+coverage/
+android/local.properties
+android/key.properties
+android/app/google-services.json
+ios/Runner/GoogleService-Info.plist
+**/serviceAccount*.json
+**/service-account*.json
+.firebaserc
+.firebase/
+functions/node_modules/
+.env
+.env.*
