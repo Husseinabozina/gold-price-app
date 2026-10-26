@@ -59,7 +59,7 @@ class MarketQuote {
   double? priceFor({required int karat, double weight = 1, WeightUnit unit = WeightUnit.gram}) {
     if (karat < 1 || karat > 24 || !weight.isFinite || weight < 0 ||
         mithqalGrams <= 0 || ounceUsd == null || fxSdgPerUsd == null ||
-        ounceUsd! <= 0 || fxSdgPerUsd! <= 0) return null;
+        ounceUsd! <= 0 || fxSdgPerUsd! <= 0) {return null;}
     return ounceUsd! / gramsPerTroyOunce * fxSdgPerUsd! * karat / 24 *
         weight * unit.inGrams(mithqalGrams);
   }

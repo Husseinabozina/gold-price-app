@@ -147,7 +147,7 @@ class FirebaseData implements AyarData {
 
   @override Future<void> createAlert(int karat, double target, String direction) async {
     if (target <= 0 || !target.isFinite || ![18,21,24].contains(karat) ||
-        !['above','below'].contains(direction)) throw ArgumentError('Invalid alert');
+        !['above','below'].contains(direction)) {throw ArgumentError('Invalid alert');}
     await _registerPushToken();
     _listenForTokenChanges();
     final uid = _auth.currentUser!.uid;

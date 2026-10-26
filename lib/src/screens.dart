@@ -30,40 +30,55 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
       if(!mounted) return;
       Navigator.of(context).pushReplacement(MaterialPageRoute(
         builder:(_)=>AyarShell(data:widget.data)));
-    } catch(e) {showError(context,e);} finally {
+    } catch(e) {if(mounted) {showError(context,e);}} finally {
       if(mounted) setState(()=>loading=false);
     }
   }
   @override Widget build(BuildContext context) => Scaffold(
-    body:SafeArea(child:Padding(padding:const EdgeInsets.all(28),child:
-      Column(crossAxisAlignment:CrossAxisAlignment.stretch,children:[
-        const Spacer(flex:2),
-        const Center(child:GoldMark(size:106)),
-        const SizedBox(height:25),
-        Text('عيار',textAlign:TextAlign.center,
-          style:Theme.of(context).textTheme.displayMedium?.copyWith(
-            color:AyarColors.paleGold,fontWeight:FontWeight.w800)),
-        const SizedBox(height:12),
-        const Text('ذهب السودان، بصورة أوضح.',textAlign:TextAlign.center,
-          style:TextStyle(color:AyarColors.muted,fontSize:17)),
-        const SizedBox(height:26),
-        const AyarPanel(child:Column(children:[
-          _FeatureText('أونصة الذهب العالمية'),SizedBox(height:14),
-          _FeatureText('تسعير بالعملة المحلية'),SizedBox(height:14),
-          _FeatureText('حاسبة وتنبيهات شخصية'),
-        ])),
-        const Spacer(flex:3),
-        FilledButton(onPressed:loading?null:start,
-          style:FilledButton.styleFrom(padding:const EdgeInsets.all(17),
-            backgroundColor:AyarColors.gold,foregroundColor:AyarColors.background),
-          child:loading?const SizedBox(width:22,height:22,
-            child:CircularProgressIndicator(strokeWidth:2)):
-            const Text('الدخول كزائر',style:TextStyle(fontWeight:FontWeight.w700))),
-        const SizedBox(height:12),
-        const Text('الأسعار استرشادية ولا تشمل المصنعية وهوامش التداول',
-          textAlign:TextAlign.center,style:TextStyle(color:AyarColors.muted,fontSize:11)),
-        const SizedBox(height:10),
-      ]))),
+    body:SafeArea(child:LayoutBuilder(builder:(context,size)=>
+      SingleChildScrollView(
+        padding:const EdgeInsets.all(24),
+        child:ConstrainedBox(
+          constraints:BoxConstraints(minHeight:size.maxHeight>48?size.maxHeight-48:0),
+          child:Column(crossAxisAlignment:CrossAxisAlignment.stretch,
+            mainAxisAlignment:MainAxisAlignment.spaceBetween,children:[
+            Column(children:[
+              const SizedBox(height:24),
+              TweenAnimationBuilder<double>(
+                tween:Tween(begin:.88,end:1),
+                curve:Curves.easeOutBack,
+                duration:const Duration(milliseconds:520),
+                builder:(context,value,child)=>Transform.scale(scale:value,child:child),
+                child:const GoldMark(size:100)),
+              const SizedBox(height:20),
+              Text('عيار',textAlign:TextAlign.center,
+                style:Theme.of(context).textTheme.displayMedium?.copyWith(
+                  color:AyarColors.paleGold,fontWeight:FontWeight.w800)),
+              const SizedBox(height:8),
+              const Text('ذهب السودان، بصورة أوضح.',textAlign:TextAlign.center,
+                style:TextStyle(color:AyarColors.muted,fontSize:17)),
+              const SizedBox(height:24),
+              const AyarPanel(child:Column(children:[
+                _FeatureText('أونصة الذهب العالمية'),SizedBox(height:12),
+                _FeatureText('تسعير بالعملة المحلية'),SizedBox(height:12),
+                _FeatureText('حاسبة وتنبيهات شخصية'),
+              ])),
+              const SizedBox(height:24),
+            ]),
+            Column(crossAxisAlignment:CrossAxisAlignment.stretch,children:[
+              FilledButton(onPressed:loading?null:start,
+                style:FilledButton.styleFrom(padding:const EdgeInsets.all(17),
+                  backgroundColor:AyarColors.gold,foregroundColor:AyarColors.background),
+                child:loading?const SizedBox(width:22,height:22,
+                  child:CircularProgressIndicator(strokeWidth:2)):
+                  const Text('الدخول كزائر',style:TextStyle(fontWeight:FontWeight.w700))),
+              const SizedBox(height:12),
+              const Text('الأسعار استرشادية ولا تشمل المصنعية وهوامش التداول',
+                textAlign:TextAlign.center,
+                style:TextStyle(color:AyarColors.muted,fontSize:11)),
+            ]),
+          ])),
+      ))),
   );
 }
 class _FeatureText extends StatelessWidget {
@@ -71,7 +86,7 @@ class _FeatureText extends StatelessWidget {
   const _FeatureText(this.text);
   @override Widget build(BuildContext context) => Row(children:[
     const Icon(LucideIcons.check,size:17,color:AyarColors.green),
-    const SizedBox(width:12),Text(text),
+    const SizedBox(width:12),Expanded(child:Text(text)),
   ]);
 }
 
@@ -110,7 +125,7 @@ class _AyarShellState extends State<AyarShell> {
       if(!mounted) return;
       await Navigator.of(context).push(MaterialPageRoute(
         builder:(_)=>AdminScreen(data:widget.data)));
-    } catch(e) {showError(context,e);}
+    } catch(e) {if(mounted) {showError(context,e);}}
   }
   @override Widget build(BuildContext context) => StreamBuilder<MarketQuote>(
     stream:quoteStream,
@@ -199,7 +214,7 @@ class PriceScreen extends StatelessWidget {
           const SizedBox(height:4),
           AnimateNumber('${money(quote.priceFor(karat:24,unit:WeightUnit.mithqal))} ج.س',
             style:const TextStyle(fontWeight:FontWeight.w800,fontSize:19)),
-          Text('المثقال = ${money(quote.mithqalGrams,decimals:2)} جرام (قابل للضبط)',
+          Text('المثقال = ${money(quote.mithqalGrams,decimals:2)} جرام (افتراض يحتاج تأكيداً)',
             style:const TextStyle(color:AyarColors.muted,fontSize:10)),
         ])),
       ])),
@@ -359,10 +374,10 @@ class AlertsScreen extends StatelessWidget {
       Expanded(child:StreamBuilder<List<PriceAlert>>(stream:alerts,builder:(context,s){
         if(s.hasError) return Center(child:Text('تعذر تحميل التنبيهات: ${s.error}'));
         if(!s.hasData) return const Center(child:CircularProgressIndicator());
-        if(s.data!.isEmpty) return const Center(child:Text('لا توجد تنبيهات حتى الآن',
-          style:TextStyle(color:AyarColors.muted)));
+        if(s.data!.isEmpty) {return const Center(child:Text('لا توجد تنبيهات حتى الآن',
+          style:TextStyle(color:AyarColors.muted)));}
         return ListView.separated(itemCount:s.data!.length,
-          separatorBuilder:(_,__)=>const SizedBox(height:10),
+          separatorBuilder:(_,_)=>const SizedBox(height:10),
           itemBuilder:(context,i){final a=s.data![i];return AyarPanel(child:Row(children:[
             Icon(a.direction=='above'?LucideIcons.trendingUp:LucideIcons.trendingDown,
               color:AyarColors.gold),const SizedBox(width:12),
@@ -375,7 +390,7 @@ class AlertsScreen extends StatelessWidget {
                 style:const TextStyle(color:AyarColors.muted,fontSize:11)),
             ])),
             IconButton(tooltip:'حذف التنبيه',onPressed:()async{
-              try{await data.deleteAlert(a.id);}catch(e){showError(context,e);}
+              try{await data.deleteAlert(a.id);}catch(e){if(context.mounted) {showError(context,e);}}
             },icon:const Icon(LucideIcons.trash2,color:AyarColors.red)),
           ]));});
       })),
@@ -434,7 +449,7 @@ class _AlertEditorState extends State<AlertEditor> {
         try{
           await widget.data.createAlert(karat,value,direction);
           if(context.mounted) Navigator.pop(context,true);
-        }catch(e){showError(context,e);}
+        }catch(e){if(mounted){showError(context,e);}}
         finally{if(mounted)setState(()=>saving=false);}
       },child:Text(saving?'جارٍ الحفظ':'إنشاء التنبيه')),
     ])));
@@ -453,9 +468,9 @@ class BulletinScreen extends StatelessWidget {
         stream:bulletins,builder:(context,s){
           if(s.hasError)return Center(child:Text('تعذر تحميل النشرات: ${s.error}'));
           if(!s.hasData)return const Center(child:CircularProgressIndicator());
-          if(s.data!.isEmpty)return const Center(child:Text('لا توجد نشرات منشورة بعد'));
+          if(s.data!.isEmpty) {return const Center(child:Text('لا توجد نشرات منشورة بعد'));}
           return ListView.separated(itemCount:s.data!.length,
-            separatorBuilder:(_,__)=>const SizedBox(height:12),
+            separatorBuilder:(_,_)=>const SizedBox(height:12),
             itemBuilder:(context,i){ final b=s.data![i];return AyarPanel(child:Column(
               crossAxisAlignment:CrossAxisAlignment.start,children:[
               Text(b.title,style:const TextStyle(fontWeight:FontWeight.w800,fontSize:17)),
@@ -492,8 +507,8 @@ class _AdminSignInState extends State<AdminSignIn> {
         setState(()=>busy=true);
         try{await widget.data.signInAdmin(email.text.trim(),password.text);
           if(context.mounted)Navigator.pop(context,true);
-        }on FirebaseAuthException catch(e){showError(context,e.message??e.code);}
-        catch(e){showError(context,e);}finally{if(mounted)setState(()=>busy=false);}
+        }on FirebaseAuthException catch(e){if(mounted){showError(context,e.message??e.code);}}
+        catch(e){if(mounted){showError(context,e);}}finally{if(mounted)setState(()=>busy=false);}
       },child:Text(busy?'...':'دخول')),
     ]);
 }
@@ -527,9 +542,9 @@ class _AdminScreenState extends State<AdminScreen> {
           }
           setState(()=>updating=true);
           try{await widget.data.updateFx(value);
-            if(context.mounted)ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content:Text('تم تحديث سعر الدولار')));
-          }catch(e){showError(context,e);}finally{if(mounted)setState(()=>updating=false);}
+            if(context.mounted) {ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content:Text('تم تحديث سعر الدولار')));}
+          }catch(e){if(mounted){showError(context,e);}}finally{if(mounted)setState(()=>updating=false);}
         },child:Text(updating?'جارٍ التحديث':'حفظ سعر الصرف')),
       ])),
       const SizedBox(height:28),
@@ -549,9 +564,9 @@ class _AdminScreenState extends State<AdminScreen> {
           setState(()=>publishing=true);
           try{await widget.data.publishBulletin(headline.text.trim(),body.text.trim());
             headline.clear();body.clear();
-            if(context.mounted)ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content:Text('تم نشر الموجز')));
-          }catch(e){showError(context,e);}finally{if(mounted)setState(()=>publishing=false);}
+            if(context.mounted) {ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content:Text('تم نشر الموجز')));}
+          }catch(e){if(mounted){showError(context,e);}}finally{if(mounted)setState(()=>publishing=false);}
         },child:Text(publishing?'جارٍ النشر':'نشر الموجز')),
       ])),
       const SizedBox(height:16),
