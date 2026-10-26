@@ -30,7 +30,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
       if(!mounted) return;
       Navigator.of(context).pushReplacement(MaterialPageRoute(
         builder:(_)=>AyarShell(data:widget.data)));
-    } catch(e) {if(mounted) {showError(context,e);}} finally {
+    } catch(e) {if(context.mounted) {showError(context,e);}} finally {
       if(mounted) setState(()=>loading=false);
     }
   }
@@ -101,9 +101,27 @@ class _AyarShellState extends State<AyarShell> {
   late final Stream<List<PriceAlert>> alertStream=widget.data.watchAlerts();
   late final Stream<List<MarketBulletin>> bulletinStream=widget.data.watchBulletins();
   StreamSubscription<RemoteMessage>? foregroundNotifications;
+  StreamSubscription<RemoteMessage>? notificationTaps;
+  Timer? freshnessTimer;
+
+  void _openNotification(RemoteMessage message) {
+    if (!mounted || message.data['screen'] != 'alerts') return;
+    setState(() => tab = 2);
+  }
+
   @override void initState() {
     super.initState();
+    // Repaint the age/staleness indicators without adding Firestore listeners.
+    freshnessTimer=Timer.periodic(const Duration(minutes:1), (_) {
+      if (mounted) setState(() {});
+    });
     if (widget.data is FirebaseData) {
+      notificationTaps=FirebaseMessaging.onMessageOpenedApp.listen(_openNotification);
+      FirebaseMessaging.instance.getInitialMessage().then((message) {
+        if (message != null) _openNotification(message);
+      }).catchError((Object error) {
+        debugPrint('AYAR notification navigation unavailable: $error');
+      });
       foregroundNotifications=FirebaseMessaging.onMessage.listen((message) {
         if(!mounted) return;
         final text=message.notification?.body ?? 'وصل تنبيه سعر جديد';
@@ -113,6 +131,8 @@ class _AyarShellState extends State<AyarShell> {
   }
   @override void dispose() {
     foregroundNotifications?.cancel();
+    notificationTaps?.cancel();
+    freshnessTimer?.cancel();
     super.dispose();
   }
   Future<void> openAdmin() async {
@@ -125,7 +145,7 @@ class _AyarShellState extends State<AyarShell> {
       if(!mounted) return;
       await Navigator.of(context).push(MaterialPageRoute(
         builder:(_)=>AdminScreen(data:widget.data)));
-    } catch(e) {if(mounted) {showError(context,e);}}
+    } catch(e) {if(context.mounted) {showError(context,e);}}
   }
   @override Widget build(BuildContext context) => StreamBuilder<MarketQuote>(
     stream:quoteStream,
@@ -449,7 +469,7 @@ class _AlertEditorState extends State<AlertEditor> {
         try{
           await widget.data.createAlert(karat,value,direction);
           if(context.mounted) Navigator.pop(context,true);
-        }catch(e){if(mounted){showError(context,e);}}
+        }catch(e){if(context.mounted){showError(context,e);}}
         finally{if(mounted)setState(()=>saving=false);}
       },child:Text(saving?'جارٍ الحفظ':'إنشاء التنبيه')),
     ])));
@@ -507,8 +527,8 @@ class _AdminSignInState extends State<AdminSignIn> {
         setState(()=>busy=true);
         try{await widget.data.signInAdmin(email.text.trim(),password.text);
           if(context.mounted)Navigator.pop(context,true);
-        }on FirebaseAuthException catch(e){if(mounted){showError(context,e.message??e.code);}}
-        catch(e){if(mounted){showError(context,e);}}finally{if(mounted)setState(()=>busy=false);}
+        }on FirebaseAuthException catch(e){if(context.mounted){showError(context,e.message??e.code);}}
+        catch(e){if(context.mounted){showError(context,e);}}finally{if(mounted)setState(()=>busy=false);}
       },child:Text(busy?'...':'دخول')),
     ]);
 }
@@ -544,7 +564,7 @@ class _AdminScreenState extends State<AdminScreen> {
           try{await widget.data.updateFx(value);
             if(context.mounted) {ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content:Text('تم تحديث سعر الدولار')));}
-          }catch(e){if(mounted){showError(context,e);}}finally{if(mounted)setState(()=>updating=false);}
+          }catch(e){if(context.mounted){showError(context,e);}}finally{if(mounted)setState(()=>updating=false);}
         },child:Text(updating?'جارٍ التحديث':'حفظ سعر الصرف')),
       ])),
       const SizedBox(height:28),
@@ -566,7 +586,7 @@ class _AdminScreenState extends State<AdminScreen> {
             headline.clear();body.clear();
             if(context.mounted) {ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content:Text('تم نشر الموجز')));}
-          }catch(e){if(mounted){showError(context,e);}}finally{if(mounted)setState(()=>publishing=false);}
+          }catch(e){if(context.mounted){showError(context,e);}}finally{if(mounted)setState(()=>publishing=false);}
         },child:Text(publishing?'جارٍ النشر':'نشر الموجز')),
       ])),
       const SizedBox(height:16),
