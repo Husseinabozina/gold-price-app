@@ -12,20 +12,15 @@ void main() {
       tester.view.resetDevicePixelRatio();
     });
     await tester.pumpWidget(MaterialApp(
-      home: MediaQuery(
-        data: const MediaQueryData(textScaler: TextScaler.linear(1.6)),
-        child: WelcomeScreen(data: PreviewData()),
+      builder: (context, child) => MediaQuery(
+        data: MediaQuery.of(context).copyWith(textScaler: const TextScaler.linear(1.6)),
+        child: child!,
       ),
+      home: WelcomeScreen(data: PreviewData()),
     ));
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
     await tester.ensureVisible(find.text('الدخول كزائر'));
-    final originalErrorHandler = FlutterError.onError;
-    FlutterError.onError = (details) {
-      debugPrint('AYAR_LAYOUT_DEBUG: ${details.toString()}');
-      originalErrorHandler?.call(details);
-    };
-    addTearDown(() => FlutterError.onError = originalErrorHandler);
     await tester.tap(find.text('الدخول كزائر'));
     await tester.pumpAndSettle();
     expect(find.text('الأسعار اليوم'), findsOneWidget);

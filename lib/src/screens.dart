@@ -251,7 +251,7 @@ class _GoldHero extends StatelessWidget {
   const _GoldHero({required this.quote});
   @override Widget build(BuildContext context) => Container(
     // Accommodate text accessibility scaling without overflowing the price card.
-    height:235.0 + 125.0 * (MediaQuery.textScalerOf(context).scale(1.0)-1.0),
+    height:300.0 + 145.0 * (MediaQuery.textScalerOf(context).scale(1.0)-1.0),
     clipBehavior:Clip.antiAlias,
     decoration:BoxDecoration(borderRadius:BorderRadius.circular(25),
       gradient:const LinearGradient(begin:Alignment.topRight,end:Alignment.bottomLeft,
