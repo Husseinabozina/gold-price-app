@@ -62,4 +62,4 @@ Approximately **3–5 weeks** for design, Flutter code, actual Firebase/APNs int
 
 ## Continuous integration
 
-`.github/workflows/quality.yml` runs `flutter pub get`, `flutter analyze`, `flutter test`, Node syntax and backend tests on GitHub Actions, then builds an Android debug preview APK and uploads an `ayar-preview-debug-apk` artifact if the build succeeds. See [GitHub Actions](https://github.com/Husseinabozina/gold-price-app/actions) for per-commit results. This is CI verification, **not** a device acceptance test. No production secrets are committed.
+`.github/workflows/quality.yml` runs `flutter pub get`, `flutter analyze`, `flutter test`, Node syntax and backend tests on GitHub Actions, then builds architecture-specific Android release preview APKs and uploads an `ayar-preview-release-apks` artifact if the build succeeds. These preview release builds must not be distributed as store-signed production binaries. See [GitHub Actions](https://github.com/Husseinabozina/gold-price-app/actions) for per-commit results. This is CI verification, **not** a device acceptance test. No production secrets are committed.

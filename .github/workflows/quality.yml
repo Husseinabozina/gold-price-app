@@ -22,11 +22,11 @@ jobs:
       - run: flutter pub get
       - run: flutter analyze
       - run: flutter test
-      - run: flutter build apk --debug --dart-define=AYAR_PREVIEW=true
+      - run: flutter build apk --release --split-per-abi --dart-define=AYAR_PREVIEW=true
       - uses: actions/upload-artifact@v4
         with:
-          name: ayar-preview-debug-apk
-          path: build/app/outputs/flutter-apk/app-debug.apk
+          name: ayar-preview-release-apks
+          path: build/app/outputs/flutter-apk/app-*-release.apk
           if-no-files-found: error
   backend-quality:
     runs-on: ubuntu-latest
