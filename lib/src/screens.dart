@@ -174,6 +174,7 @@ class _AyarShellState extends State<AyarShell> {
               BulletinScreen(data:widget.data,bulletins:bulletinStream),
             ]),
         bottomNavigationBar:NavigationBar(
+          height:80.0 + 46.0 * (MediaQuery.textScalerOf(context).scale(1.0)-1.0),
           backgroundColor:AyarColors.panel,
           indicatorColor:AyarColors.gold.withValues(alpha:.14),
           selectedIndex:tab,
@@ -249,7 +250,9 @@ class _GoldHero extends StatelessWidget {
   final MarketQuote quote;
   const _GoldHero({required this.quote});
   @override Widget build(BuildContext context) => Container(
-    height:235,clipBehavior:Clip.antiAlias,
+    // Accommodate text accessibility scaling without overflowing the price card.
+    height:235.0 + 125.0 * (MediaQuery.textScalerOf(context).scale(1.0)-1.0),
+    clipBehavior:Clip.antiAlias,
     decoration:BoxDecoration(borderRadius:BorderRadius.circular(25),
       gradient:const LinearGradient(begin:Alignment.topRight,end:Alignment.bottomLeft,
         colors:[Color(0xFF303124),Color(0xFF151F2A),Color(0xFF121923)]),
